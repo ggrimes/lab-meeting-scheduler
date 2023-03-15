@@ -20,7 +20,7 @@ async function loadData() {
     return rows.map(row => row.split(','));
   }
   
-  
+  // Display schedule
   function displaySchedule(people, dates) {
     currentData.people = people;
     currentData.dates = dates;
@@ -32,7 +32,7 @@ async function loadData() {
     header.innerHTML = '<th>Name</th><th>Date</th>';
     table.appendChild(header);
   
-    // Shuffle dates array
+    // Shuffle dates array so that people don't always get the same date 
     dates = shuffle(dates);
   
     for (let i = 0; i < people.length; i++) {
@@ -41,9 +41,21 @@ async function loadData() {
       row.innerHTML = `<td>${people[i][0]}</td><td>${dates[dateIndex][0]}</td>`;
       table.appendChild(row);
     }
-  
+     // sort table by date
+    let rows = Array.from(table.querySelectorAll('tr:nth-child(n+2)'));
+    rows.sort((a, b) => {
+        let dateA = new Date(a.querySelector('td:nth-child(2)').textContent);
+        let dateB = new Date(b.querySelector('td:nth-child(2)').textContent);
+        return dateA - dateB;
+    });
+    rows.forEach(row => table.appendChild(row));
+    
+    // append the table to the schedule div
     scheduleDiv.appendChild(table);
   }
+  
+
+  
   
   function shuffle(array) {
     let currentIndex = array.length, temporaryValue, randomIndex;
