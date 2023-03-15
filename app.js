@@ -22,7 +22,7 @@ async function loadData() {
   
   // Display schedule
   function displaySchedule(people, dates) {
-    currentData.people = people;
+    currentData.people = people; 
     currentData.dates = dates;
     let scheduleDiv = document.getElementById('schedule');
     scheduleDiv.innerHTML = '';
@@ -106,11 +106,13 @@ async function loadData() {
   }
   
   // Create ICS file content
-  function createICSContent(people, dates) {
+  function createICSContent(people, dates, startTime, location) {
     let icsContent = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Lab Meeting Scheduler//EN\r\n";
   
     for (let i = 0; i < people.length; i++) {
       const eventDate = new Date(dates[i % dates.length]);
+      eventDate.setHours(startTime.getHours());
+      eventDate.setMinutes(startTime.getMinutes());
       const startDate = formatDate(eventDate);
       const endDate = formatDate(new Date(eventDate.getTime() + 2 * 60 * 60 * 1000));
       const uid = startDate + '-' + i + '@labmeetingscheduler';
@@ -121,6 +123,7 @@ async function loadData() {
       icsContent += "DTSTART:" + startDate + "\r\n";
       icsContent += "DTEND:" + endDate + "\r\n";
       icsContent += "SUMMARY:Lab Meeting with " + people[i] + "\r\n";
+      icsContent += "LOCATION:" + location + "\r\n";
       icsContent += "END:VEVENT\r\n";
     }
   
@@ -128,10 +131,15 @@ async function loadData() {
     return icsContent;
   }
   
-  
   // event listener for the export to ICS button
   document.getElementById('exportCalendar').addEventListener('click', () => {
-    const icsContent = createICSContent(currentData.people, currentData.dates);
+    const timeInput = document.getElementById('time');
+    const locationInput = document.getElementById('location');
+    const startTime = new Date();
+    startTime.setHours(timeInput.valueAsDate.getUTCHours());
+    startTime.setMinutes(timeInput.valueAsDate.getUTCMinutes());
+  
+    const icsContent = createICSContent(currentData.people, currentData.dates, startTime, locationInput.value);
     const encodedUri = "data:text/calendar;charset=utf-8," + encodeURIComponent(icsContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
